@@ -16,14 +16,7 @@
  */
 package org.superbiz.moviefun.movies;
 
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Repository;
-import org.springframework.transaction.PlatformTransactionManager;
-import org.springframework.transaction.TransactionDefinition;
-import org.springframework.transaction.TransactionStatus;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.transaction.support.DefaultTransactionDefinition;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
@@ -35,11 +28,7 @@ import java.util.List;
 @Repository
 public class MoviesBean {
 
-    @Autowired
-    @Qualifier("movieTransactionManager")
-    PlatformTransactionManager transactionManager;
-
-    @PersistenceContext
+    @PersistenceContext(unitName = "movies")
     private EntityManager entityManager;
 
     public Movie find(Long id) {
@@ -47,32 +36,20 @@ public class MoviesBean {
     }
 
     public void addMovie(Movie movie) {
-        TransactionDefinition def = new DefaultTransactionDefinition();
-        TransactionStatus status = transactionManager.getTransaction(def);
         entityManager.persist(movie);
-        transactionManager.commit(status);
     }
 
     public void editMovie(Movie movie) {
-        TransactionDefinition def = new DefaultTransactionDefinition();
-        TransactionStatus status = transactionManager.getTransaction(def);
         entityManager.merge(movie);
-        transactionManager.commit(status);
     }
 
     public void deleteMovie(Movie movie) {
-        TransactionDefinition def = new DefaultTransactionDefinition();
-        TransactionStatus status = transactionManager.getTransaction(def);
         entityManager.remove(movie);
-        transactionManager.commit(status);
     }
 
     public void deleteMovieId(long id) {
-        TransactionDefinition def = new DefaultTransactionDefinition();
-        TransactionStatus status = transactionManager.getTransaction(def);
         Movie movie = entityManager.find(Movie.class, id);
         deleteMovie(movie);
-        transactionManager.commit(status);
     }
 
     public List<Movie> getMovies() {

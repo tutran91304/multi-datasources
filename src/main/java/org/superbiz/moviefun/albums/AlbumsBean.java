@@ -33,18 +33,11 @@ import java.util.List;
 @Repository
 public class AlbumsBean {
 
-    @Autowired
-    @Qualifier("albumTransactionManager")
-    PlatformTransactionManager transactionManager;
-
     @PersistenceContext(unitName="albums")
     private EntityManager entityManager;
 
     public void addAlbum(Album album) {
-        TransactionDefinition def = new DefaultTransactionDefinition();
-        TransactionStatus status = transactionManager.getTransaction(def);
         entityManager.persist(album);
-        transactionManager.commit(status);
     }
 
     public List<Album> getAlbums() {

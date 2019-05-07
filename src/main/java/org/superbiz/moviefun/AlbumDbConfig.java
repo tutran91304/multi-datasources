@@ -19,44 +19,26 @@ import javax.sql.DataSource;
 import java.util.Properties;
 
 @Configuration
-@EnableTransactionManagement
-@EnableJpaRepositories(
-        entityManagerFactoryRef = "entityManagerFactory",
-        basePackages = {"org.superbiz.moviefun.albums"}
-)
 public class AlbumDbConfig {
 
-    @Value("${VCAP_SERVICES}")
-    private String vcapJsonString;
-
     @Bean
-    public DatabaseServiceCredentials databaseServiceCredentials() {
-        return new DatabaseServiceCredentials(this.vcapJsonString);
-    }
-
-    @Primary
-    @Bean(name = "albumDataSource")
-    public DataSource getDataSource() {
+    public DataSource albumsDataSource(DatabaseServiceCredentials databaseServiceCredentials) {
         MysqlDataSource dataSource = new MysqlDataSource();
-        dataSource.setURL(databaseServiceCredentials().jdbcUrl("albums-mysql"));
+        dataSource.setURL(databaseServiceCredentials.jdbcUrl("albums-mysql"));
         HikariDataSource hikariDataSource = new HikariDataSource();
         hikariDataSource.setDataSource(dataSource);
         return hikariDataSource;
     }
 
-
-    @Bean(name = "albumEntityManagerFactory")
-    public LocalContainerEntityManagerFactoryBean movieEntityManagerFactoryBean() {
+    @Bean
+    public LocalContainerEntityManagerFactoryBean albumsEntityManagerFactory(DataSource albumsDataSource, HibernateJpaVendorAdapter hibernateJpaVendorAdapter) {
 
         LocalContainerEntityManagerFactoryBean factoryBean = new LocalContainerEntityManagerFactoryBean();
-        factoryBean.setDataSource(getDataSource());
+        factoryBean.setDataSource(albumsDataSource);
         factoryBean.setPackagesToScan("org.superbiz.moviefun");
         factoryBean.setPersistenceUnitName("albums");
 
-        HibernateJpaVendorAdapter vendorAdapter = new HibernateJpaVendorAdapter();
-        vendorAdapter.setShowSql(true);
-//        vendorAdapter.setDatabasePlatform(hibernateDialect);
-        factoryBean.setJpaVendorAdapter(vendorAdapter);
+        factoryBean.setJpaVendorAdapter(hibernateJpaVendorAdapter);
 
         Properties jpaProperties = new Properties();
         jpaProperties.put("hibernate.show_sql",true);
@@ -64,11 +46,10 @@ public class AlbumDbConfig {
         factoryBean.setJpaProperties(jpaProperties);
 
         return factoryBean;
-
     }
 
-    @Bean(name = "albumTransactionManager")
-    public PlatformTransactionManager albumTransactionManager(@Qualifier("albumEntityManagerFactory") EntityManagerFactory factory) {
-        return new JpaTransactionManager(factory);
+    @Bean
+    public PlatformTransactionManager albumsPlatformTransactionManager(EntityManagerFactory albumsEntityManagerFactory) {
+        return new JpaTransactionManager(albumsEntityManagerFactory);
     }
 }
