@@ -16,8 +16,17 @@
  */
 package org.superbiz.moviefun.movies;
 
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.orm.jpa.LocalContainerEntityManagerFactoryBean;
 import org.springframework.stereotype.Repository;
+import org.springframework.transaction.PlatformTransactionManager;
+import org.springframework.transaction.TransactionDefinition;
+import org.springframework.transaction.TransactionStatus;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.transaction.support.DefaultTransactionDefinition;
+import org.springframework.transaction.support.TransactionCallback;
+import org.springframework.transaction.support.TransactionCallbackWithoutResult;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
@@ -29,6 +38,10 @@ import java.util.List;
 @Repository
 public class MoviesBean {
 
+    @Autowired
+    @Qualifier("movieTransactionManager")
+    PlatformTransactionManager transactionManager;
+
     @PersistenceContext
     private EntityManager entityManager;
 
@@ -36,9 +49,11 @@ public class MoviesBean {
         return entityManager.find(Movie.class, id);
     }
 
-    @Transactional
     public void addMovie(Movie movie) {
+        TransactionDefinition def = new DefaultTransactionDefinition();
+        TransactionStatus status = transactionManager.getTransaction(def);
         entityManager.persist(movie);
+        transactionManager.commit(status);
     }
 
     @Transactional
