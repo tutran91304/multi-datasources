@@ -67,6 +67,6 @@ public class MovieDbConfig {
 
     @Bean(name = "movieTransactionManager")
     public PlatformTransactionManager movieTransactionManager( @Qualifier("movieEntityManagerFactory") EntityManagerFactory factory) {
-        return new JpaTransactionManager();
+        return new JpaTransactionManager(factory);
     }
 }

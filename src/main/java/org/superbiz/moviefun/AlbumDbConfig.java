@@ -66,6 +66,6 @@ public class AlbumDbConfig {
 
     @Bean(name = "albumTransactionManager")
     public PlatformTransactionManager albumTransactionManager(@Qualifier("albumEntityManagerFactory") EntityManagerFactory factory) {
-        return new JpaTransactionManager();
+        return new JpaTransactionManager(factory);
     }
 }
