@@ -53,20 +53,26 @@ public class MoviesBean {
         transactionManager.commit(status);
     }
 
-    @Transactional
     public void editMovie(Movie movie) {
+        TransactionDefinition def = new DefaultTransactionDefinition();
+        TransactionStatus status = transactionManager.getTransaction(def);
         entityManager.merge(movie);
+        transactionManager.commit(status);
     }
 
-    @Transactional
     public void deleteMovie(Movie movie) {
+        TransactionDefinition def = new DefaultTransactionDefinition();
+        TransactionStatus status = transactionManager.getTransaction(def);
         entityManager.remove(movie);
+        transactionManager.commit(status);
     }
 
-    @Transactional
     public void deleteMovieId(long id) {
+        TransactionDefinition def = new DefaultTransactionDefinition();
+        TransactionStatus status = transactionManager.getTransaction(def);
         Movie movie = entityManager.find(Movie.class, id);
         deleteMovie(movie);
+        transactionManager.commit(status);
     }
 
     public List<Movie> getMovies() {
